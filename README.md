@@ -189,3 +189,16 @@ make down
 ```
 
 The Docker workflow is documented in [docs/docker.md](docs/docker.md).
+
+## Project Documentation
+
+Important project documents:
+
+- [Architecture](docs/architecture.md)
+- [Roadmap](docs/roadmap.md)
+- [Docker Development Environment](docs/docker.md)
+- [Project Management](docs/project-management.md)
+- [Database Design](docs/database.md)
+- [Training Guide](docs/training.md)
+- [Deployment Guide](docs/deployment.md)
+- [Real-World Integration Design](docs/real-world-integration.md)
