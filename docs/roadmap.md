@@ -170,3 +170,38 @@ Goals:
 - Add screenshots
 - Prepare technical presentation
 - Prepare CV and LinkedIn descriptions
+
+---
+
+## Project Management Notes
+
+This roadmap is tracked through GitHub Issues and Pull Requests.
+
+## Current Workflow
+
+```text
+GitHub Issue
+    ↓
+Feature Branch
+    ↓
+Pull Request
+    ↓
+Verification Evidence
+    ↓
+Squash Merge
+    ↓
+Git Tag
+    ↓
+Issue Closure
+```
+
+GitHub Issues currently act as the project board. A dedicated GitHub Projects board may be added later if the issue count grows significantly.
+
+## Completed Release Tags
+
+```text
+v0.1-project-foundation
+v0.2-dockerized-foundation
+v0.2.1-docker-workflow
+v0.2.2-compose-profiles
+```
