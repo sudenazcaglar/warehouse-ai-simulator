@@ -26,6 +26,7 @@ REQUIRED_KEYS=(
   "STREAM_PORT"
   "PROMETHEUS_PORT"
   "GRAFANA_PORT"
+  "NGINX_PORT"
 )
 
 if [[ ! -f "${ENV_FILE}" ]]; then

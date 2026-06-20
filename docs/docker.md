@@ -150,3 +150,80 @@ The local Docker environment is intended for development and integration testing
 ## Phase 2B Result
 
 The Docker environment now includes a repeatable developer workflow with Makefile commands, environment validation, automated health checks, and documented operational procedures.
+
+## Compose Profiles
+
+The development Compose file supports profiles to reduce local resource usage.
+
+### Core Development Environment
+
+Starts only the essential services:
+
+```bash
+make up-core
+make health-core
+```
+
+Core services:
+
+- API
+- Dashboard
+- PostgreSQL
+- Redis
+- MinIO
+- Nginx
+
+### Full Development Environment
+
+Starts all development services:
+
+```bash
+make up-full
+make health
+```
+
+Full services include:
+
+- Core services
+- Prometheus
+- Grafana
+- TensorBoard
+
+### Observability Profile
+
+Starts core services with Prometheus and Grafana:
+
+```bash
+make up-observability
+```
+
+### Production-Like Environment
+
+The project includes a separate production-like Compose file:
+
+```bash
+make prod-config
+make prod-up
+make prod-ps
+```
+
+Production-like differences:
+
+- API runs without auto-reload
+- Dashboard is built as static assets
+- Dashboard is served by Nginx
+- Database and Redis are not exposed to the host
+- Public access goes through the Nginx gateway
+- Observability can be enabled with a profile
+
+Start production-like environment with observability:
+
+```bash
+make prod-up-obs
+```
+
+Stop production-like environment:
+
+```bash
+make prod-down
+```
