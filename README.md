@@ -109,18 +109,18 @@ Project foundation phase is in progress.
 
 ## Planned System Components
 
-| Component | Purpose |
-|---|---|
-| Unity Simulation | Warehouse environment, robots, shelves, delivery zones, obstacles |
-| ML-Agents Training | PPO-based reinforcement learning and model export |
-| FastAPI Backend | API layer for runs, events, metrics, checkpoints, and explanations |
-| PostgreSQL | Structured storage for simulation runs, agent events, metrics, and model metadata |
-| Redis | Cache, queue, and real-time coordination layer |
-| Object Storage | Model artifacts, ONNX files, checkpoints, and training outputs |
-| React Dashboard | Real-time monitoring, model registry, training charts, and live stream |
-| LLM Service | Natural language explanations of robot behavior |
-| Docker Compose | Reproducible local and production-like deployment |
-| Monitoring Stack | Prometheus and Grafana observability |
+| Component          | Purpose                                                                           |
+| ------------------ | --------------------------------------------------------------------------------- |
+| Unity Simulation   | Warehouse environment, robots, shelves, delivery zones, obstacles                 |
+| ML-Agents Training | PPO-based reinforcement learning and model export                                 |
+| FastAPI Backend    | API layer for runs, events, metrics, checkpoints, and explanations                |
+| PostgreSQL         | Structured storage for simulation runs, agent events, metrics, and model metadata |
+| Redis              | Cache, queue, and real-time coordination layer                                    |
+| Object Storage     | Model artifacts, ONNX files, checkpoints, and training outputs                    |
+| React Dashboard    | Real-time monitoring, model registry, training charts, and live stream            |
+| LLM Service        | Natural language explanations of robot behavior                                   |
+| Docker Compose     | Reproducible local and production-like deployment                                 |
+| Monitoring Stack   | Prometheus and Grafana observability                                              |
 
 ## Target Outcome
 
@@ -148,14 +148,44 @@ docker compose ps
 
 Main local URLs:
 
-| Service | URL |
-|---|---|
-| Dashboard | <http://localhost:3000> |
-| API Docs | <http://localhost:8000/docs> |
-| Nginx Gateway | <http://localhost:8080> |
-| MinIO Console | <http://localhost:9001> |
-| Prometheus | <http://localhost:9090> |
-| Grafana | <http://localhost:3001> |
-| TensorBoard | <http://localhost:6006> |
+| Service       | URL                          |
+| ------------- | ---------------------------- |
+| Dashboard     | <http://localhost:3000>      |
+| API Docs      | <http://localhost:8000/docs> |
+| Nginx Gateway | <http://localhost:8080>      |
+| MinIO Console | <http://localhost:9001>      |
+| Prometheus    | <http://localhost:9090>      |
+| Grafana       | <http://localhost:3001>      |
+| TensorBoard   | <http://localhost:6006>      |
 
 For details, see [Docker Development Environment](docs/docker.md).
+
+## Developer Workflow
+
+Common development commands are available through the project Makefile.
+
+```bash
+make doctor
+make up
+make ps
+make health
+make logs
+make down
+```
+
+The Docker workflow is documented in [docs/docker.md](docs/docker.md).
+
+## Developer Workflow
+
+Common development commands are available through the project Makefile.
+
+```bash
+make doctor
+make up
+make ps
+make health
+make logs
+make down
+```
+
+The Docker workflow is documented in [docs/docker.md](docs/docker.md).
