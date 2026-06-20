@@ -2,6 +2,12 @@ SHELL := /bin/bash
 
 .DEFAULT_GOAL := help
 
+DC := docker compose
+DC_FULL := docker compose --profile observability --profile training
+DC_OBS := docker compose --profile observability
+DC_PROD := docker compose -f docker-compose.prod.yml
+DC_PROD_OBS := docker compose -f docker-compose.prod.yml --profile observability
+
 .PHONY: help
 help:
 	@echo "Warehouse AI Simulator - Development Commands"
@@ -11,18 +17,30 @@ help:
 	@echo "  make validate-env     Validate required environment variables"
 	@echo "  make doctor           Validate Docker, env, and compose config"
 	@echo ""
-	@echo "Docker:"
-	@echo "  make build            Build all Docker images"
-	@echo "  make up               Start all services"
-	@echo "  make down             Stop all services"
-	@echo "  make restart          Restart all services"
-	@echo "  make ps               Show service status"
-	@echo "  make logs             Follow all logs"
+	@echo "Development Docker:"
+	@echo "  make build            Build full development environment"
+	@echo "  make up               Start full development environment"
+	@echo "  make up-core          Start lightweight core environment"
+	@echo "  make up-full          Start full environment with observability and training tools"
+	@echo "  make up-observability Start core environment with Prometheus and Grafana"
+	@echo "  make down             Stop all development services"
+	@echo "  make restart          Restart full development environment"
+	@echo "  make ps               Show full development service status"
+	@echo "  make ps-core          Show core service status"
+	@echo "  make logs             Follow full development logs"
 	@echo "  make clean            Stop services and prune dangling resources"
-	@echo "  make reset            Stop services and remove volumes"
+	@echo "  make reset            Stop services and remove development volumes"
+	@echo ""
+	@echo "Production-like Docker:"
+	@echo "  make prod-config      Validate production compose config"
+	@echo "  make prod-up          Start production-like services"
+	@echo "  make prod-up-obs      Start production-like services with observability"
+	@echo "  make prod-ps          Show production-like service status"
+	@echo "  make prod-down        Stop production-like services"
 	@echo ""
 	@echo "Health:"
-	@echo "  make health           Verify all service health endpoints"
+	@echo "  make health           Verify full development service health"
+	@echo "  make health-core      Verify core development service health"
 	@echo "  make api-health       Check API health endpoint"
 	@echo ""
 	@echo "Shells:"
@@ -49,49 +67,68 @@ doctor: env validate-env
 	@docker info >/dev/null
 	@echo "Docker daemon is running."
 	@echo "Checking Docker Compose configuration..."
-	@docker compose config >/dev/null
+	@$(DC_FULL) config >/dev/null
 	@echo "Docker Compose configuration is valid."
 
 .PHONY: build
 build:
-	docker compose build
+	$(DC_FULL) build
 
 .PHONY: up
-up: doctor
-	docker compose up --build -d
+up: up-full
+
+.PHONY: up-core
+up-core: doctor
+	$(DC) up --build -d
+
+.PHONY: up-full
+up-full: doctor
+	$(DC_FULL) up --build -d
+
+.PHONY: up-observability
+up-observability: doctor
+	$(DC_OBS) up --build -d
 
 .PHONY: down
 down:
-	docker compose down
+	$(DC_FULL) down --remove-orphans
 
 .PHONY: restart
 restart:
-	docker compose down
-	docker compose up --build -d
+	$(DC_FULL) down --remove-orphans
+	$(DC_FULL) up --build -d
 
 .PHONY: ps
 ps:
-	docker compose ps
+	$(DC_FULL) ps
+
+.PHONY: ps-core
+ps-core:
+	$(DC) ps
 
 .PHONY: logs
 logs:
-	docker compose logs -f
+	$(DC_FULL) logs -f
 
 .PHONY: api-logs
 api-logs:
-	docker compose logs -f api
+	$(DC_FULL) logs -f api
 
 .PHONY: dashboard-logs
 dashboard-logs:
-	docker compose logs -f dashboard
+	$(DC_FULL) logs -f dashboard
 
 .PHONY: db-logs
 db-logs:
-	docker compose logs -f postgres
+	$(DC_FULL) logs -f postgres
 
 .PHONY: health
 health:
 	@./scripts/verify-services.sh
+
+.PHONY: health-core
+health-core:
+	@./scripts/verify-core-services.sh
 
 .PHONY: api-health
 api-health:
@@ -99,15 +136,15 @@ api-health:
 
 .PHONY: db-shell
 db-shell:
-	docker compose exec postgres psql -U warehouse_user -d warehouse_ai
+	$(DC_FULL) exec postgres psql -U warehouse_user -d warehouse_ai
 
 .PHONY: redis-shell
 redis-shell:
-	docker compose exec redis redis-cli
+	$(DC_FULL) exec redis redis-cli
 
 .PHONY: api-shell
 api-shell:
-	docker compose exec api /bin/sh
+	$(DC_FULL) exec api /bin/sh
 
 .PHONY: clean
 clean:
@@ -115,4 +152,25 @@ clean:
 
 .PHONY: reset
 reset:
-	docker compose down -v
+	$(DC_FULL) down -v --remove-orphans
+
+.PHONY: prod-config
+prod-config: env validate-env
+	@$(DC_PROD) config >/dev/null
+	@echo "Production Compose configuration is valid."
+
+.PHONY: prod-up
+prod-up: prod-config
+	$(DC_PROD) up --build -d
+
+.PHONY: prod-up-obs
+prod-up-obs: prod-config
+	$(DC_PROD_OBS) up --build -d
+
+.PHONY: prod-ps
+prod-ps:
+	$(DC_PROD_OBS) ps
+
+.PHONY: prod-down
+prod-down:
+	$(DC_PROD_OBS) down --remove-orphans
