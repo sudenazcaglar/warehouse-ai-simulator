@@ -129,3 +129,33 @@ The final project will be a complete AI engineering showcase demonstrating how a
 ## License
 
 MIT License
+
+## Docker Development Quick Start
+
+The project includes a Docker Compose based local development environment.
+
+Start all services:
+
+```bash
+docker compose up --build -d
+```
+
+Check running services:
+
+```bash
+docker compose ps
+```
+
+Main local URLs:
+
+| Service | URL |
+|---|---|
+| Dashboard | <http://localhost:3000> |
+| API Docs | <http://localhost:8000/docs> |
+| Nginx Gateway | <http://localhost:8080> |
+| MinIO Console | <http://localhost:9001> |
+| Prometheus | <http://localhost:9090> |
+| Grafana | <http://localhost:3001> |
+| TensorBoard | <http://localhost:6006> |
+
+For details, see [Docker Development Environment](docs/docker.md).
