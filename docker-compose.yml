@@ -10,6 +10,8 @@ services:
       - "${API_PORT:-8000}:8000"
     volumes:
       - ./apps/api/app:/app/app
+      - ./apps/api/alembic.ini:/app/alembic.ini
+      - ./apps/api/alembic:/app/alembic
     networks:
       - warehouse-network
     healthcheck:

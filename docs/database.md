@@ -25,3 +25,121 @@ This document will describe the PostgreSQL schema, data model, indexing strategy
 - LLM explanation storage
 - Analytics-ready schema
 - Migration-based database evolution
+
+---
+
+## Alembic Migration Workflow
+
+The project uses Alembic for database schema migrations.
+
+### Alembic Configuration
+
+Alembic configuration files are located under:
+
+```text
+apps/api/alembic.ini
+apps/api/alembic/
+```
+
+### Check Alembic Setup
+
+```bash
+make db-check-alembic
+```
+
+### Show Current Migration
+
+```bash
+make db-current
+```
+
+### Show Migration Heads
+
+```bash
+make db-heads
+```
+
+### Create a New Migration
+
+```bash
+make db-revision MSG="create initial schema"
+```
+
+### Apply Migrations
+
+```bash
+make db-upgrade
+```
+
+### Roll Back the Last Migration
+
+```bash
+make db-downgrade
+```
+
+### Migration Files
+
+Migration files are stored under:
+
+```text
+apps/api/alembic/versions/
+```
+
+---
+
+## Alembic Migration Workflow
+
+The project uses Alembic for database schema migrations.
+
+### Alembic Configuration
+
+Alembic configuration files are located under:
+
+```text
+apps/api/alembic.ini
+apps/api/alembic/
+```
+
+### Check Alembic Setup
+
+```bash
+make db-check-alembic
+```
+
+### Show Current Migration
+
+```bash
+make db-current
+```
+
+### Show Migration Heads
+
+```bash
+make db-heads
+```
+
+### Create a New Migration
+
+```bash
+make db-revision MSG="create initial schema"
+```
+
+### Apply Migrations
+
+```bash
+make db-upgrade
+```
+
+### Roll Back the Last Migration
+
+```bash
+make db-downgrade
+```
+
+### Migration Files
+
+Migration files are stored under:
+
+```text
+apps/api/alembic/versions/
+```

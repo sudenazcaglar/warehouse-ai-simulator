@@ -174,3 +174,38 @@ prod-ps:
 .PHONY: prod-down
 prod-down:
 	$(DC_PROD_OBS) down --remove-orphans
+
+.PHONY: db-current
+db-current:
+	$(DC_FULL) exec api alembic current
+
+.PHONY: db-heads
+db-heads:
+	$(DC_FULL) exec api alembic heads
+
+.PHONY: db-history
+db-history:
+	$(DC_FULL) exec api alembic history
+
+.PHONY: db-upgrade
+db-upgrade:
+	$(DC_FULL) exec api alembic upgrade head
+
+.PHONY: db-downgrade
+db-downgrade:
+	$(DC_FULL) exec api alembic downgrade -1
+
+.PHONY: db-revision
+db-revision:
+	@if [ -z "$(MSG)" ]; then \
+		echo "Usage: make db-revision MSG=\"create initial schema\""; \
+		exit 1; \
+	fi
+	$(DC_FULL) exec api alembic revision --autogenerate -m "$(MSG)"
+
+.PHONY: db-check-alembic
+db-check-alembic:
+	$(DC_FULL) exec api python -m app.scripts.check_alembic_setup
+	$(DC_FULL) exec api alembic current
+	$(DC_FULL) exec api alembic heads
+
