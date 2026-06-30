@@ -143,3 +143,78 @@ Migration files are stored under:
 ```text
 apps/api/alembic/versions/
 ```
+
+---
+
+## ORM Model Architecture
+
+The database model layer is implemented using SQLAlchemy 2.0 typed ORM models.
+
+### Current ORM Tables
+
+| Table                 | Purpose                                                      |
+| --------------------- | ------------------------------------------------------------ |
+| `environment_configs` | Stores reusable simulation and training environment settings |
+| `simulation_runs`     | Represents Unity simulation executions                       |
+| `training_sessions`   | Represents ML-Agents / PPO training sessions                 |
+| `episodes`            | Stores reinforcement learning episode-level summaries        |
+| `agents`              | Represents robots inside a simulation run                    |
+| `agent_events`        | Stores robot movement, decision, reward, and event logs      |
+| `collisions`          | Stores collision events                                      |
+| `deliveries`          | Stores pickup and delivery task outcomes                     |
+| `checkpoints`         | Stores training checkpoint metadata                          |
+| `model_versions`      | Stores trained model version metadata                        |
+| `llm_explanations`    | Stores LLM-generated explanations for agent events           |
+| `system_metrics`      | Stores time-series system and training metrics               |
+
+## Relationship Overview
+
+```text
+environment_configs
+├── simulation_runs
+└── training_sessions
+
+simulation_runs
+├── training_sessions
+├── episodes
+├── agents
+├── agent_events
+├── collisions
+├── deliveries
+└── system_metrics
+
+training_sessions
+├── episodes
+├── checkpoints
+├── model_versions
+└── system_metrics
+
+agents
+├── agent_events
+├── collisions
+└── deliveries
+
+agent_events
+└── llm_explanations
+
+checkpoints
+└── model_versions
+```
+
+## JSONB Usage
+
+JSONB fields are used for flexible metadata that may vary across simulation, training, and LLM workflows.
+
+Examples include:
+
+- Simulation configuration snapshots
+- Unity event payloads
+- Training hyperparameter metadata
+- Checkpoint artifact metadata
+- LLM prompt and context metadata
+
+## Model Metadata Verification
+
+```bash
+make db-check-models
+```

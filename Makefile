@@ -209,3 +209,7 @@ db-check-alembic:
 	$(DC_FULL) exec api alembic current
 	$(DC_FULL) exec api alembic heads
 
+.PHONY: db-check-models
+db-check-models:
+	$(DC_FULL) exec api python -m app.scripts.check_model_metadata
+
