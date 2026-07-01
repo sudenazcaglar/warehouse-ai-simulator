@@ -306,3 +306,65 @@ This behavior is expected for tables with unique constraints, including:
 - `checkpoints`
 - `episodes`
 - `model_versions`
+
+---
+
+## Seed Data and Synthetic Demo Data
+
+The project includes scripts for inserting baseline seed data and generating synthetic demo data.
+
+### Insert Baseline Seed Data
+
+```bash
+make db-seed
+```
+
+This clears existing demo data and inserts:
+
+- 1 environment config
+- 1 simulation run
+- 1 training session
+- 3 agents
+- 5 episodes
+- 50 agent events
+- 3 collisions
+- 5 deliveries
+- 3 checkpoints
+- 2 model versions
+- 3 LLM explanations
+- 20 system metrics
+
+### Generate Additional Synthetic Demo Data
+
+```bash
+make db-generate-demo-data
+```
+
+This appends an additional generated dataset with:
+
+- 1 environment config
+- 1 simulation run
+- 1 training session
+- 5 agents
+- 10 episodes
+- 200 agent events
+- 8 collisions
+- 20 deliveries
+- 4 checkpoints
+- 2 model versions
+- 5 LLM explanations
+- 50 system metrics
+
+### Verify Seed Data
+
+```bash
+make db-check-data
+```
+
+### Show Table Counts
+
+```bash
+make db-table-counts
+```
+
+Seed and demo data are intended for local development, dashboard testing, API development, and database validation.

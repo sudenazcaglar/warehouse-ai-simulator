@@ -217,3 +217,19 @@ db-check-models:
 db-check-schema:
 	$(DC_FULL) exec api python -m app.scripts.check_database_schema
 
+.PHONY: db-seed
+db-seed:
+	$(DC_FULL) exec api python -m app.scripts.seed_database
+
+.PHONY: db-generate-demo-data
+db-generate-demo-data:
+	$(DC_FULL) exec api python -m app.scripts.generate_demo_data
+
+.PHONY: db-check-data
+db-check-data:
+	$(DC_FULL) exec api python -m app.scripts.check_seed_data
+
+.PHONY: db-table-counts
+db-table-counts:
+	$(DC_FULL) exec api python -m app.scripts.show_table_counts
+
