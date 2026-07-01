@@ -218,3 +218,91 @@ Examples include:
 ```bash
 make db-check-models
 ```
+
+---
+
+## Initial Schema Migration
+
+The initial database schema is generated from the SQLAlchemy ORM models using Alembic autogeneration.
+
+### Generate the Initial Migration
+
+```bash
+make db-revision MSG="create initial database schema"
+```
+
+### Apply the Initial Migration
+
+```bash
+make db-upgrade
+```
+
+### Verify the Current Revision
+
+```bash
+make db-current
+make db-heads
+```
+
+### Verify the Database Schema
+
+```bash
+make db-check-schema
+```
+
+### Inspect PostgreSQL Tables
+
+```bash
+docker compose exec postgres psql -U warehouse_user -d warehouse_ai -c "\dt"
+```
+
+### Inspect PostgreSQL Enum Types
+
+```bash
+docker compose exec postgres psql -U warehouse_user -d warehouse_ai -c "\dT"
+```
+
+## Initial Schema Result
+
+The initial schema creates the following application tables:
+
+- `environment_configs`
+- `simulation_runs`
+- `training_sessions`
+- `episodes`
+- `agents`
+- `agent_events`
+- `collisions`
+- `deliveries`
+- `checkpoints`
+- `model_versions`
+- `llm_explanations`
+- `system_metrics`
+
+Alembic also creates the following internal table:
+
+- `alembic_version`
+
+## Schema Features
+
+The generated schema includes:
+
+- UUID primary keys
+- Foreign key relationships
+- PostgreSQL enum types
+- JSONB metadata fields
+- Indexes
+- Unique constraints
+- Timestamp fields
+
+## Index Count Note
+
+PostgreSQL automatically creates physical indexes to enforce unique constraints. As a result, database-level index inspection may report more indexes than SQLAlchemy `table.indexes`, which counts only explicitly declared `Index(...)` objects.
+
+This behavior is expected for tables with unique constraints, including:
+
+- `environment_configs`
+- `agents`
+- `checkpoints`
+- `episodes`
+- `model_versions`

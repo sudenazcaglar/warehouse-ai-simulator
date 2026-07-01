@@ -213,3 +213,7 @@ db-check-alembic:
 db-check-models:
 	$(DC_FULL) exec api python -m app.scripts.check_model_metadata
 
+.PHONY: db-check-schema
+db-check-schema:
+	$(DC_FULL) exec api python -m app.scripts.check_database_schema
+

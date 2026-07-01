@@ -47,10 +47,6 @@ Discovered tables: 12.
 Database connection successful. SELECT 1 returned 1.
 ```
 
-## Result
-
-Pending verification.
-
 ## Verification Result
 
 The following commands were executed successfully:
