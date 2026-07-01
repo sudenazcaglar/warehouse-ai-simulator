@@ -2,21 +2,9 @@ from datetime import datetime, timezone
 
 from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from app.core.config import settings
 
-class Settings(BaseSettings):
-    project_name: str = "warehouse-ai-simulator"
-    environment: str = "development"
-    api_version: str = "0.1.0"
-
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        extra="ignore",
-    )
-
-
-settings = Settings()
 
 app = FastAPI(
     title="Warehouse AI Simulator API",

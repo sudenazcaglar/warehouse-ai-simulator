@@ -174,3 +174,83 @@ prod-ps:
 .PHONY: prod-down
 prod-down:
 	$(DC_PROD_OBS) down --remove-orphans
+
+.PHONY: db-current
+db-current:
+	$(DC_FULL) exec api alembic current
+
+.PHONY: db-heads
+db-heads:
+	$(DC_FULL) exec api alembic heads
+
+.PHONY: db-history
+db-history:
+	$(DC_FULL) exec api alembic history
+
+.PHONY: db-upgrade
+db-upgrade:
+	$(DC_FULL) exec api alembic upgrade head
+
+.PHONY: db-downgrade
+db-downgrade:
+	$(DC_FULL) exec api alembic downgrade -1
+
+.PHONY: db-revision
+db-revision:
+	@if [ -z "$(MSG)" ]; then \
+		echo "Usage: make db-revision MSG=\"create initial schema\""; \
+		exit 1; \
+	fi
+	$(DC_FULL) exec api alembic revision --autogenerate -m "$(MSG)"
+
+.PHONY: db-check-alembic
+db-check-alembic:
+	$(DC_FULL) exec api python -m app.scripts.check_alembic_setup
+	$(DC_FULL) exec api alembic current
+	$(DC_FULL) exec api alembic heads
+
+.PHONY: db-check-models
+db-check-models:
+	$(DC_FULL) exec api python -m app.scripts.check_model_metadata
+
+.PHONY: db-check-schema
+db-check-schema:
+	$(DC_FULL) exec api python -m app.scripts.check_database_schema
+
+.PHONY: db-seed
+db-seed:
+	$(DC_FULL) exec api python -m app.scripts.seed_database
+
+.PHONY: db-generate-demo-data
+db-generate-demo-data:
+	$(DC_FULL) exec api python -m app.scripts.generate_demo_data
+
+.PHONY: db-check-data
+db-check-data:
+	$(DC_FULL) exec api python -m app.scripts.check_seed_data
+
+.PHONY: db-table-counts
+db-table-counts:
+	$(DC_FULL) exec api python -m app.scripts.show_table_counts
+
+.PHONY: db-backup
+db-backup:
+	@./scripts/db-backup.sh
+
+.PHONY: db-restore
+db-restore:
+	@if [ -z "$(BACKUP)" ]; then \
+		echo "Usage: make db-restore BACKUP=backups/warehouse_ai_YYYYMMDD_HHMMSS.sql"; \
+		exit 1; \
+	fi
+	@./scripts/db-restore.sh "$(BACKUP)"
+
+.PHONY: db-verify
+db-verify:
+	$(DC_FULL) exec api python -m app.scripts.check_database_connection
+	$(DC_FULL) exec api python -m app.scripts.check_model_metadata
+	$(DC_FULL) exec api python -m app.scripts.check_alembic_setup
+	$(DC_FULL) exec api python -m app.scripts.check_database_schema
+	$(DC_FULL) exec api python -m app.scripts.check_seed_data
+	$(DC_FULL) exec api python -m app.scripts.show_table_counts
+

@@ -92,3 +92,12 @@ logs/
 # IDE
 .vscode/settings.json
 .idea/
+
+# Temporary Files
+.temp
+.notes
+
+# Database Backups
+backups/*.sql
+backups/*.dump
+!backups/.gitkeep
