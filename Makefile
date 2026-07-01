@@ -233,3 +233,24 @@ db-check-data:
 db-table-counts:
 	$(DC_FULL) exec api python -m app.scripts.show_table_counts
 
+.PHONY: db-backup
+db-backup:
+	@./scripts/db-backup.sh
+
+.PHONY: db-restore
+db-restore:
+	@if [ -z "$(BACKUP)" ]; then \
+		echo "Usage: make db-restore BACKUP=backups/warehouse_ai_YYYYMMDD_HHMMSS.sql"; \
+		exit 1; \
+	fi
+	@./scripts/db-restore.sh "$(BACKUP)"
+
+.PHONY: db-verify
+db-verify:
+	$(DC_FULL) exec api python -m app.scripts.check_database_connection
+	$(DC_FULL) exec api python -m app.scripts.check_model_metadata
+	$(DC_FULL) exec api python -m app.scripts.check_alembic_setup
+	$(DC_FULL) exec api python -m app.scripts.check_database_schema
+	$(DC_FULL) exec api python -m app.scripts.check_seed_data
+	$(DC_FULL) exec api python -m app.scripts.show_table_counts
+

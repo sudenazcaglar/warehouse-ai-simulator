@@ -96,3 +96,8 @@ logs/
 # Temporary Files
 .temp
 .notes
+
+# Database Backups
+backups/*.sql
+backups/*.dump
+!backups/.gitkeep
