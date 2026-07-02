@@ -1,15 +1,18 @@
+from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_pagination, validate_uuid
-from app.models.enums import SimulationStatus
+from app.models.enums import AgentEventType, SimulationStatus
 from app.repositories import agents as agent_repository
+from app.repositories import events as event_repository
 from app.repositories import runs as run_repository
-from app.schemas.agents import AgentListResponse
+from app.schemas.agents import AgentListResponse, AgentResponse
 from app.schemas.common import ModuleStatusResponse
-from app.schemas.pagination import PaginatedResponse, PaginationParams
+from app.schemas.events import EventListResponse, EventResponse
+from app.schemas.pagination import PaginationParams
 from app.schemas.runs import RunCreate, RunListResponse, RunResponse
 
 router = APIRouter(prefix="/runs", tags=["runs"])
@@ -82,12 +85,11 @@ def list_run_agents(
     agent_status = None
     if status_filter is not None:
         from app.models.enums import AgentStatus
+        from app.api.errors import BadRequestError
 
         try:
             agent_status = AgentStatus(status_filter)
         except ValueError as exc:
-            from app.api.errors import BadRequestError
-
             raise BadRequestError(
                 message="Invalid agent status.",
                 code="invalid_agent_status",
@@ -104,10 +106,48 @@ def list_run_agents(
         sort_order=sort_order,
     )
 
-    from app.schemas.agents import AgentResponse
-
     return AgentListResponse.create(
         items=[AgentResponse.model_validate(item) for item in items],
+        total=total,
+        pagination=pagination,
+    )
+
+
+@router.get("/{run_id}/events", response_model=EventListResponse)
+def list_run_events(
+    run_id: str,
+    pagination: PaginationParams = Depends(get_pagination),
+    agent_id: str | None = Query(default=None),
+    event_type: AgentEventType | None = Query(default=None),
+    reason_code: str | None = Query(default=None),
+    start_time: datetime | None = Query(default=None),
+    end_time: datetime | None = Query(default=None),
+    sort_order: Literal["asc", "desc"] = Query(default="desc"),
+    db: Session = Depends(get_db),
+) -> EventListResponse:
+    parsed_run_id = validate_uuid(run_id, "run_id")
+    run_repository.require_run_by_id(db, parsed_run_id)
+
+    parsed_agent_id = (
+        validate_uuid(agent_id, "agent_id")
+        if agent_id is not None
+        else None
+    )
+
+    items, total = event_repository.list_events(
+        db,
+        pagination=pagination,
+        simulation_run_id=parsed_run_id,
+        agent_id=parsed_agent_id,
+        event_type=event_type,
+        reason_code=reason_code,
+        start_time=start_time,
+        end_time=end_time,
+        sort_order=sort_order,
+    )
+
+    return EventListResponse.create(
+        items=[EventResponse.model_validate(item) for item in items],
         total=total,
         pagination=pagination,
     )

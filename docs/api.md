@@ -300,3 +300,118 @@ Missing resources return:
   }
 }
 ```
+
+---
+
+# Events API
+
+Phase 4D adds event ingestion and event timeline APIs.
+
+## Create Event
+
+```http
+POST /api/v1/events
+```
+
+Example request:
+
+```json
+{
+  "simulation_run_id": "run-uuid",
+  "episode_id": null,
+  "agent_id": "agent-uuid",
+  "step": 1250,
+  "position_x": 4.2,
+  "position_z": 8.1,
+  "velocity": 1.4,
+  "action": "move_to_target",
+  "reward_delta": 0.05,
+  "event_type": "moved",
+  "reason_code": "normal_operation",
+  "metadata_json": {
+    "source": "api"
+  }
+}
+```
+
+The API validates:
+
+- Simulation run existence
+- Agent existence
+- Agent belongs to the specified simulation run
+- Optional episode existence
+- Optional episode belongs to the specified simulation run
+
+## List Events
+
+```http
+GET /api/v1/events
+```
+
+Supported query parameters:
+
+- `page`
+- `page_size`
+- `simulation_run_id`
+- `agent_id`
+- `episode_id`
+- `event_type`
+- `reason_code`
+- `start_time`
+- `end_time`
+- `sort_order`
+
+Default sorting:
+
+```text
+timestamp desc
+```
+
+## Agent Timeline
+
+```http
+GET /api/v1/agents/{agent_id}/timeline
+```
+
+This endpoint returns the event timeline for a single agent.
+
+Default sorting:
+
+```text
+timestamp asc
+```
+
+## Run Events
+
+```http
+GET /api/v1/runs/{run_id}/events
+```
+
+This endpoint returns all events associated with a single simulation run.
+
+## Error Behavior
+
+### Invalid UUID
+
+Invalid UUID values return a **400 Bad Request** with the `invalid_uuid` error code.
+
+### Missing Resources
+
+Missing simulation runs, agents, or episodes return a **404 Not Found** with the `not_found` error code.
+
+### Relationship Mismatch
+
+Relationship validation failures return a **409 Conflict** response.
+
+Example:
+
+```json
+{
+  "error": {
+    "code": "agent_run_mismatch",
+    "message": "Agent does not belong to the provided simulation run.",
+    "details": {},
+    "request_id": "request-id"
+  }
+}
+```

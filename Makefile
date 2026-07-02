@@ -299,3 +299,11 @@ api-verify-runs-agents:
 	$(DC_FULL) exec api python -m app.scripts.check_runs_agents_api_foundation
 	@echo "Runs and agents API verification successful."
 
+.PHONY: api-verify-events
+api-verify-events:
+	curl -fsS http://localhost:8000/health >/dev/null
+	curl -fsS http://localhost:8000/api/v1/events >/dev/null
+	curl -fsS http://localhost:8000/openapi.json >/dev/null
+	$(DC_FULL) exec api python -m app.scripts.check_events_api_foundation
+	@echo "Events API verification successful."
+

@@ -1,13 +1,16 @@
+from datetime import datetime
 from typing import Literal
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_pagination, validate_uuid
-from app.models.enums import AgentStatus
+from app.models.enums import AgentEventType, AgentStatus
 from app.repositories import agents as agent_repository
+from app.repositories import events as event_repository
 from app.schemas.agents import AgentListResponse, AgentResponse
 from app.schemas.common import ModuleStatusResponse
+from app.schemas.events import EventListResponse, EventResponse
 from app.schemas.pagination import PaginationParams
 
 router = APIRouter(prefix="/agents", tags=["agents"])
@@ -52,6 +55,38 @@ def list_agents(
 
     return AgentListResponse.create(
         items=[AgentResponse.model_validate(item) for item in items],
+        total=total,
+        pagination=pagination,
+    )
+
+
+@router.get("/{agent_id}/timeline", response_model=EventListResponse)
+def get_agent_timeline(
+    agent_id: str,
+    pagination: PaginationParams = Depends(get_pagination),
+    event_type: AgentEventType | None = Query(default=None),
+    reason_code: str | None = Query(default=None),
+    start_time: datetime | None = Query(default=None),
+    end_time: datetime | None = Query(default=None),
+    sort_order: Literal["asc", "desc"] = Query(default="asc"),
+    db: Session = Depends(get_db),
+) -> EventListResponse:
+    parsed_agent_id = validate_uuid(agent_id, "agent_id")
+    agent_repository.require_agent_by_id(db, parsed_agent_id)
+
+    items, total = event_repository.list_events(
+        db,
+        pagination=pagination,
+        agent_id=parsed_agent_id,
+        event_type=event_type,
+        reason_code=reason_code,
+        start_time=start_time,
+        end_time=end_time,
+        sort_order=sort_order,
+    )
+
+    return EventListResponse.create(
+        items=[EventResponse.model_validate(item) for item in items],
         total=total,
         pagination=pagination,
     )
