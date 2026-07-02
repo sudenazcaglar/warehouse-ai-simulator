@@ -164,3 +164,139 @@ The shared database dependency is responsible for:
 ## UUID Validation
 
 A shared UUID validation helper is available for validating endpoint path and query parameters.
+
+---
+
+# Runs and Agents API
+
+Phase 4C adds the first database-backed REST API endpoints.
+
+## Runs
+
+### Create Run
+
+```http
+POST /api/v1/runs
+```
+
+Example request:
+
+```json
+{
+  "run_name": "api-created-run",
+  "environment_name": "WarehouseSimulator-API",
+  "agent_count": 3,
+  "map_version": "2026.api",
+  "status": "created",
+  "config_json": {
+    "source": "api"
+  }
+}
+```
+
+### List Runs
+
+```http
+GET /api/v1/runs
+```
+
+Supported query parameters:
+
+- `page`
+- `page_size`
+- `status`
+- `run_name`
+- `environment_name`
+- `sort_by`
+- `sort_order`
+
+Supported sort fields:
+
+- `created_at`
+- `started_at`
+- `run_name`
+- `status`
+
+### Get Run Detail
+
+```http
+GET /api/v1/runs/{run_id}
+```
+
+### Get Agents for a Run
+
+```http
+GET /api/v1/runs/{run_id}/agents
+```
+
+---
+
+## Agents
+
+### List Agents
+
+```http
+GET /api/v1/agents
+```
+
+Supported query parameters:
+
+- `page`
+- `page_size`
+- `status`
+- `simulation_run_id`
+- `agent_name`
+- `policy_name`
+- `sort_by`
+- `sort_order`
+
+Supported sort fields:
+
+- `created_at`
+- `agent_name`
+- `status`
+
+### Get Agent Detail
+
+```http
+GET /api/v1/agents/{agent_id}
+```
+
+---
+
+## Error Behavior
+
+### Invalid UUID
+
+Invalid UUID values return:
+
+```json
+{
+  "error": {
+    "code": "invalid_uuid",
+    "message": "Invalid UUID value for 'run_id'.",
+    "details": {
+      "field": "run_id",
+      "value": "not-a-valid-id"
+    },
+    "request_id": "request-id"
+  }
+}
+```
+
+### Resource Not Found
+
+Missing resources return:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Simulation run not found.",
+    "details": {
+      "run_id": "uuid"
+    },
+    "request_id": "request-id"
+  }
+}
+```

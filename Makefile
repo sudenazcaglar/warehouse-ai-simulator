@@ -282,11 +282,20 @@ api-verify-common:
 	curl -fsS http://localhost:8000/api/v1 >/dev/null
 	curl -fsS http://localhost:8000/openapi.json >/dev/null
 	$(DC_FULL) exec api python -m app.scripts.check_api_error_foundation
-	@STATUS=$$(curl -s -o /tmp/warehouse_api_404.json -w "%{http_code}" http://localhost:8000/api/v1/runs/not-a-valid-id); \
+	@STATUS=$$(curl -s -o /tmp/warehouse_api_404.json -w "%{http_code}" http://localhost:8000/api/v1/not-found-check); \
 		test "$$STATUS" = "404"; \
 		grep -q '"error"' /tmp/warehouse_api_404.json; \
 		grep -q '"request_id"' /tmp/warehouse_api_404.json; \
 		echo "Standard 404 error response verified."
 	$(DC_FULL) exec api python -m app.scripts.show_api_routes
 	@echo "Common API foundation verification successful."
+
+.PHONY: api-verify-runs-agents
+api-verify-runs-agents:
+	curl -fsS http://localhost:8000/health >/dev/null
+	curl -fsS http://localhost:8000/api/v1/runs >/dev/null
+	curl -fsS http://localhost:8000/api/v1/agents >/dev/null
+	curl -fsS http://localhost:8000/openapi.json >/dev/null
+	$(DC_FULL) exec api python -m app.scripts.check_runs_agents_api_foundation
+	@echo "Runs and agents API verification successful."
 
