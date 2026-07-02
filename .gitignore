@@ -94,8 +94,8 @@ logs/
 .idea/
 
 # Temporary Files
-.temp
-.notes
+*.temp
+*.notes
 
 # Database Backups
 backups/*.sql

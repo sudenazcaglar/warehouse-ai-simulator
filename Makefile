@@ -254,3 +254,25 @@ db-verify:
 	$(DC_FULL) exec api python -m app.scripts.check_seed_data
 	$(DC_FULL) exec api python -m app.scripts.show_table_counts
 
+.PHONY: api-openapi
+api-openapi:
+	curl -fsS http://localhost:8000/openapi.json >/dev/null
+	@echo "OpenAPI document is available."
+
+.PHONY: api-docs-check
+api-docs-check:
+	curl -fsS http://localhost:8000/docs >/dev/null
+	@echo "Swagger UI is available."
+
+.PHONY: api-routes
+api-routes:
+	$(DC_FULL) exec api python -m app.scripts.show_api_routes
+
+.PHONY: api-verify-foundation
+api-verify-foundation:
+	curl -fsS http://localhost:8000/health >/dev/null
+	curl -fsS http://localhost:8000/api/v1 >/dev/null
+	curl -fsS http://localhost:8000/openapi.json >/dev/null
+	$(DC_FULL) exec api python -m app.scripts.show_api_routes
+	@echo "API foundation verification successful."
+

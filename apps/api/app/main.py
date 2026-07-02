@@ -1,15 +1,40 @@
 from datetime import datetime, timezone
 
-from fastapi import FastAPI, Response
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import PlainTextResponse
 
-from app.core.config import settings
+from app.api.errors import register_exception_handlers
+from app.api.router import router as api_router
+from app.core.config import get_settings
+from app.db.session import check_database_connection
+from app.schemas.common import APIInfoResponse, HealthResponse
+
+settings = get_settings()
+
+API_MODULES = [
+    "runs",
+    "training",
+    "agents",
+    "events",
+    "metrics",
+    "checkpoints",
+    "models",
+    "explanations",
+    "stream",
+]
 
 
 app = FastAPI(
     title="Warehouse AI Simulator API",
-    description="Backend API for simulation runs, training metrics, checkpoints, and LLM explanations.",
-    version=settings.api_version,
+    description=(
+        "Backend API for the Explainable Multi-Agent Warehouse Robot "
+        "Training Simulator."
+    ),
+    version="0.4.0-dev",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
 )
 
 app.add_middleware(
@@ -20,41 +45,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-@app.get("/")
-def root() -> dict:
-    return {
-        "project": settings.project_name,
-        "service": "api",
-        "status": "running",
-        "environment": settings.environment,
-        "docs": "/docs",
-    }
+register_exception_handlers(app)
+app.include_router(api_router)
 
 
-@app.get("/health")
-def health_check() -> dict:
-    return {
-        "status": "healthy",
-        "service": "api",
-        "project": settings.project_name,
-        "environment": settings.environment,
-        "checked_at": datetime.now(timezone.utc).isoformat(),
-    }
+@app.get("/", response_model=APIInfoResponse, tags=["root"])
+def root() -> APIInfoResponse:
+    return APIInfoResponse(
+        service=getattr(settings, "app_name", "warehouse-ai-simulator-api"),
+        version="0.4.0-dev",
+        environment=getattr(settings, "environment", "development"),
+        modules=API_MODULES,
+    )
 
 
-@app.get("/metrics")
-def metrics() -> Response:
-    content = "\n".join(
+@app.get("/health", response_model=HealthResponse, tags=["health"])
+def health() -> HealthResponse:
+    database_status = "healthy" if check_database_connection() else "unhealthy"
+
+    return HealthResponse(
+        status="healthy" if database_status == "healthy" else "degraded",
+        service=getattr(settings, "app_name", "warehouse-ai-simulator-api"),
+        environment=getattr(settings, "environment", "development"),
+        database=database_status,
+        timestamp=datetime.now(timezone.utc),
+    )
+
+
+@app.get("/metrics", response_class=PlainTextResponse, tags=["metrics"])
+def metrics() -> str:
+    return "\n".join(
         [
-            "# HELP warehouse_api_up API availability status.",
+            "# HELP warehouse_api_up API availability",
             "# TYPE warehouse_api_up gauge",
             "warehouse_api_up 1",
-            "# HELP warehouse_api_info Static API information.",
-            "# TYPE warehouse_api_info gauge",
-            f'warehouse_api_info{{project="{settings.project_name}",environment="{settings.environment}"}} 1',
             "",
         ]
     )
-
-    return Response(content=content, media_type="text/plain")
