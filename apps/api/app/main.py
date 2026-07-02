@@ -5,10 +5,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import PlainTextResponse
 
 from app.api.errors import register_exception_handlers
+from app.api.middleware import RequestLoggingMiddleware
 from app.api.router import router as api_router
 from app.core.config import get_settings
+from app.core.logging import configure_logging
 from app.db.session import check_database_connection
 from app.schemas.common import APIInfoResponse, HealthResponse
+
+configure_logging()
 
 settings = get_settings()
 
@@ -36,6 +40,8 @@ app = FastAPI(
     redoc_url="/redoc",
     openapi_url="/openapi.json",
 )
+
+app.add_middleware(RequestLoggingMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

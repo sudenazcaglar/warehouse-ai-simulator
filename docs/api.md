@@ -69,3 +69,98 @@ The resource modules currently expose module status endpoints under:
 ```
 
 Database-backed CRUD endpoints will be implemented in the subsequent Phase 4 subphases.
+
+---
+
+# Common API Standards
+
+Phase 4B defines shared API standards for response schemas, errors, pagination, dependencies, and logging.
+
+## Standard Error Response
+
+Errors use the following response format:
+
+```json
+{
+  "error": {
+    "code": "not_found",
+    "message": "Resource not found.",
+    "details": {},
+    "request_id": "request-id"
+  }
+}
+```
+
+## Error Types
+
+The API defines common error classes for:
+
+- Bad request
+- Not found
+- Conflict
+- Database operation failure
+- Validation failure
+- Unhandled internal errors
+
+## Pagination
+
+The API supports the following pagination parameters:
+
+- `page`
+- `page_size`
+- `offset`
+- `limit`
+
+### Default Values
+
+```text
+page=1
+page_size=20
+```
+
+### Maximum Page Size
+
+```text
+100
+```
+
+## Request ID
+
+Each request is assigned a unique request identifier.
+
+The request ID is returned in the following response header:
+
+```text
+X-Request-ID
+```
+
+It is also included in standard error responses.
+
+## Request Logging
+
+The API logs the following request lifecycle events:
+
+- `request_started`
+- `request_completed`
+- `request_failed`
+
+Each log entry includes:
+
+- Request ID
+- HTTP method
+- Request path
+- HTTP status code
+- Request duration (milliseconds)
+
+## Database Dependency
+
+The shared database dependency is responsible for:
+
+- Session creation
+- Rollback on exceptions
+- Database error logging
+- Session cleanup
+
+## UUID Validation
+
+A shared UUID validation helper is available for validating endpoint path and query parameters.
