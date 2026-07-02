@@ -415,3 +415,123 @@ Example:
   }
 }
 ```
+
+---
+
+# Metrics API and WebSocket Streams
+
+Phase 4E adds metrics ingestion, metrics query endpoints, and live WebSocket streams.
+
+## Metrics
+
+### Create Metric
+
+```http
+POST /api/v1/metrics
+```
+
+Example request:
+
+```json
+{
+  "simulation_run_id": "run-uuid",
+  "training_session_id": "training-session-uuid",
+  "metric_name": "episode_reward",
+  "metric_value": 12.5,
+  "metric_unit": "score",
+  "source": "training",
+  "metadata_json": {
+    "episode": 12
+  }
+}
+```
+
+### List Metrics
+
+```http
+GET /api/v1/metrics
+```
+
+Supported query parameters:
+
+- `page`
+- `page_size`
+- `simulation_run_id`
+- `training_session_id`
+- `metric_name`
+- `source`
+- `start_time`
+- `end_time`
+- `sort_order`
+
+### Run Metrics
+
+```http
+GET /api/v1/runs/{run_id}/metrics
+```
+
+### Training Metrics
+
+```http
+GET /api/v1/training/{training_id}/metrics
+```
+
+---
+
+# WebSocket Streams
+
+## Run Metrics Stream
+
+```text
+ws://localhost:8000/ws/runs/{run_id}/metrics
+```
+
+This endpoint broadcasts metrics posted for the specified simulation run.
+
+Example payload:
+
+```json
+{
+  "type": "metric",
+  "data": {
+    "id": "metric-uuid",
+    "simulation_run_id": "run-uuid",
+    "training_session_id": "training-session-uuid",
+    "metric_name": "episode_reward",
+    "metric_value": 12.5,
+    "metric_unit": "score",
+    "source": "training",
+    "timestamp": "2026-07-02T10:00:00Z",
+    "metadata_json": {}
+  }
+}
+```
+
+## Agent Events Stream
+
+```text
+ws://localhost:8000/ws/agents/{agent_id}/events
+```
+
+This endpoint broadcasts events posted for the specified agent.
+
+Example payload:
+
+```json
+{
+  "type": "agent_event",
+  "data": {
+    "id": "event-uuid",
+    "agent_id": "agent-uuid",
+    "simulation_run_id": "run-uuid",
+    "event_type": "custom",
+    "action": "move_to_target"
+  }
+}
+```
+
+## WebSocket Scope
+
+The initial WebSocket implementation uses an in-memory connection manager.
+
+It is designed for local development and API verification. A distributed pub/sub backend can be introduced later to support deployments with multiple API replicas.

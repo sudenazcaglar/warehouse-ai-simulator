@@ -5,13 +5,15 @@ from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db, get_pagination, validate_uuid
-from app.models.enums import AgentEventType, SimulationStatus
+from app.models.enums import AgentEventType, MetricSource, SimulationStatus
 from app.repositories import agents as agent_repository
 from app.repositories import events as event_repository
+from app.repositories import metrics as metric_repository
 from app.repositories import runs as run_repository
 from app.schemas.agents import AgentListResponse, AgentResponse
 from app.schemas.common import ModuleStatusResponse
 from app.schemas.events import EventListResponse, EventResponse
+from app.schemas.metrics import MetricListResponse, MetricResponse
 from app.schemas.pagination import PaginationParams
 from app.schemas.runs import RunCreate, RunListResponse, RunResponse
 
@@ -148,6 +150,38 @@ def list_run_events(
 
     return EventListResponse.create(
         items=[EventResponse.model_validate(item) for item in items],
+        total=total,
+        pagination=pagination,
+    )
+
+
+@router.get("/{run_id}/metrics", response_model=MetricListResponse)
+def list_run_metrics(
+    run_id: str,
+    pagination: PaginationParams = Depends(get_pagination),
+    metric_name: str | None = Query(default=None),
+    source: MetricSource | None = Query(default=None),
+    start_time: datetime | None = Query(default=None),
+    end_time: datetime | None = Query(default=None),
+    sort_order: Literal["asc", "desc"] = Query(default="desc"),
+    db: Session = Depends(get_db),
+) -> MetricListResponse:
+    parsed_run_id = validate_uuid(run_id, "run_id")
+    run_repository.require_run_by_id(db, parsed_run_id)
+
+    items, total = metric_repository.list_metrics(
+        db,
+        pagination=pagination,
+        simulation_run_id=parsed_run_id,
+        metric_name=metric_name,
+        source=source,
+        start_time=start_time,
+        end_time=end_time,
+        sort_order=sort_order,
+    )
+
+    return MetricListResponse.create(
+        items=[MetricResponse.model_validate(item) for item in items],
         total=total,
         pagination=pagination,
     )

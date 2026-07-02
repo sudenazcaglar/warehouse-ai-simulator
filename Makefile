@@ -307,3 +307,22 @@ api-verify-events:
 	$(DC_FULL) exec api python -m app.scripts.check_events_api_foundation
 	@echo "Events API verification successful."
 
+.PHONY: api-verify-metrics
+api-verify-metrics:
+	curl -fsS http://localhost:8000/health >/dev/null
+	curl -fsS http://localhost:8000/api/v1/metrics >/dev/null
+	curl -fsS http://localhost:8000/openapi.json >/dev/null
+	$(DC_FULL) exec api python -m app.scripts.check_metrics_api_foundation
+	@echo "Metrics API verification successful."
+
+.PHONY: api-verify-websockets
+api-verify-websockets:
+	$(DC_FULL) exec api python -m app.scripts.check_websocket_streams
+	@echo "WebSocket stream verification successful."
+
+.PHONY: api-verify-metrics-streams
+api-verify-metrics-streams:
+	$(MAKE) api-verify-metrics
+	$(MAKE) api-verify-websockets
+	@echo "Metrics and WebSocket stream verification successful."
+

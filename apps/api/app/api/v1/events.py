@@ -10,6 +10,7 @@ from app.repositories import events as event_repository
 from app.schemas.common import ModuleStatusResponse
 from app.schemas.events import EventCreate, EventListResponse, EventResponse
 from app.schemas.pagination import PaginationParams
+from app.services.websocket_manager import websocket_manager
 
 router = APIRouter(prefix="/events", tags=["events"])
 
@@ -28,12 +29,22 @@ def events_module_status() -> ModuleStatusResponse:
     response_model=EventResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_event(
+async def create_event(
     payload: EventCreate,
     db: Session = Depends(get_db),
 ) -> EventResponse:
     event = event_repository.create_event(db, payload)
-    return EventResponse.model_validate(event)
+    response = EventResponse.model_validate(event)
+
+    await websocket_manager.broadcast_agent_event(
+        str(event.agent_id),
+        {
+            "type": "agent_event",
+            "data": response.model_dump(mode="json"),
+        },
+    )
+
+    return response
 
 
 @router.get("", response_model=EventListResponse)

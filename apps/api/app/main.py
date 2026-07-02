@@ -7,6 +7,7 @@ from fastapi.responses import PlainTextResponse
 from app.api.errors import register_exception_handlers
 from app.api.middleware import RequestLoggingMiddleware
 from app.api.router import router as api_router
+from app.api.v1.stream import ws_router
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.db.session import check_database_connection
@@ -53,6 +54,7 @@ app.add_middleware(
 
 register_exception_handlers(app)
 app.include_router(api_router)
+app.include_router(ws_router)
 
 
 @app.get("/", response_model=APIInfoResponse, tags=["root"])
