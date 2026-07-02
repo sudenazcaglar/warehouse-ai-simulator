@@ -535,3 +535,128 @@ Example payload:
 The initial WebSocket implementation uses an in-memory connection manager.
 
 It is designed for local development and API verification. A distributed pub/sub backend can be introduced later to support deployments with multiple API replicas.
+
+---
+
+# Training API
+
+Phase 4F adds database-backed training session APIs.
+
+This phase does **not** start a real ML-Agents process. Instead, the `training/start` endpoint creates a `TrainingSession` record in the database and marks it as running.
+
+## Start Training
+
+```http
+POST /api/v1/training/start
+```
+
+Example request:
+
+```json
+{
+  "simulation_run_id": "run-uuid",
+  "environment_config_id": null,
+  "algorithm": "ppo",
+  "max_steps": 100000,
+  "learning_rate": 0.0003,
+  "batch_size": 64,
+  "buffer_size": 2048,
+  "checkpoint_interval": 5000
+}
+```
+
+The created training session starts with:
+
+```text
+status=running
+current_step=0
+```
+
+## Stop Training
+
+```http
+POST /api/v1/training/{training_id}/stop
+```
+
+Example request:
+
+```json
+{
+  "status": "completed"
+}
+```
+
+Supported stop statuses:
+
+- `completed`
+- `cancelled`
+- `failed`
+
+Stopping a training session sets the `ended_at` timestamp.
+
+Repeated stop attempts on a terminal training session return a **409 Conflict** response.
+
+## List Training Sessions
+
+```http
+GET /api/v1/training
+```
+
+Supported query parameters:
+
+- `page`
+- `page_size`
+- `simulation_run_id`
+- `status`
+- `algorithm`
+- `sort_by`
+- `sort_order`
+
+Supported sort fields:
+
+- `created_at`
+- `started_at`
+- `updated_at`
+- `status`
+- `algorithm`
+
+## Get Training Detail
+
+```http
+GET /api/v1/training/{training_id}
+```
+
+## Training Metrics
+
+```http
+GET /api/v1/training/{training_id}/metrics
+```
+
+This endpoint was introduced in **Phase 4E** and remains available in **Phase 4F**.
+
+## Error Behavior
+
+### Invalid UUID
+
+Invalid UUID values return a **400 Bad Request** with the `invalid_uuid` error code.
+
+### Missing Resources
+
+Missing training sessions or simulation runs return a **404 Not Found** with the `not_found` error code.
+
+### Training Already Stopped
+
+Repeated stop attempts return a **409 Conflict** response.
+
+Example:
+
+```json
+{
+  "error": {
+    "code": "training_already_stopped",
+    "message": "Training session is already in a terminal state.",
+    "details": {},
+    "request_id": "request-id"
+  }
+}
+```

@@ -5,6 +5,12 @@ from app.schemas.events import EventCreate, EventListResponse, EventResponse
 from app.schemas.metrics import MetricCreate, MetricListResponse, MetricResponse
 from app.schemas.pagination import PaginatedResponse, PaginationParams
 from app.schemas.runs import RunCreate, RunListResponse, RunResponse
+from app.schemas.training import (
+    TrainingListResponse,
+    TrainingResponse,
+    TrainingStartRequest,
+    TrainingStopRequest,
+)
 
 __all__ = [
     "APIInfoResponse",
@@ -26,5 +32,9 @@ __all__ = [
     "RunCreate",
     "RunListResponse",
     "RunResponse",
+    "TrainingListResponse",
+    "TrainingResponse",
+    "TrainingStartRequest",
+    "TrainingStopRequest",
     "ValidationErrorDetail",
 ]

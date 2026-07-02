@@ -326,3 +326,11 @@ api-verify-metrics-streams:
 	$(MAKE) api-verify-websockets
 	@echo "Metrics and WebSocket stream verification successful."
 
+.PHONY: api-verify-training
+api-verify-training:
+	curl -fsS http://localhost:8000/health >/dev/null
+	curl -fsS http://localhost:8000/api/v1/training >/dev/null
+	curl -fsS http://localhost:8000/openapi.json >/dev/null
+	$(DC_FULL) exec api python -m app.scripts.check_training_api_foundation
+	@echo "Training API verification successful."
+
