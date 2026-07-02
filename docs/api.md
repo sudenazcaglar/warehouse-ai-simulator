@@ -660,3 +660,193 @@ Example:
   }
 }
 ```
+
+---
+
+# Checkpoints and Model Registry API
+
+Phase 4G adds checkpoint metadata and model registry metadata APIs.
+
+## Checkpoints
+
+### Create Checkpoint
+
+```http
+POST /api/v1/checkpoints
+```
+
+Example request:
+
+```json
+{
+  "training_session_id": "training-session-uuid",
+  "step": 50000,
+  "reward_mean": 42.5,
+  "success_rate": 0.91,
+  "collision_rate": 0.03,
+  "file_path": "s3://warehouse-ai/checkpoints/run-1/step-50000.pt",
+  "storage_backend": "minio",
+  "is_best": true,
+  "metadata_json": {
+    "source": "api"
+  }
+}
+```
+
+If `is_best=true`, any existing best checkpoints for the same training session are automatically unset.
+
+### List Checkpoints
+
+```http
+GET /api/v1/checkpoints
+```
+
+Supported query parameters:
+
+- `page`
+- `page_size`
+- `training_session_id`
+- `is_best`
+- `sort_by`
+- `sort_order`
+
+Supported sort fields:
+
+- `created_at`
+- `step`
+- `reward_mean`
+- `success_rate`
+- `collision_rate`
+
+### Get Checkpoint Detail
+
+```http
+GET /api/v1/checkpoints/{checkpoint_id}
+```
+
+### Get Best Checkpoint
+
+```http
+GET /api/v1/checkpoints/best
+```
+
+Optional query parameter:
+
+- `training_session_id`
+
+---
+
+## Model Registry
+
+### Create Model Version
+
+```http
+POST /api/v1/models
+```
+
+Example request:
+
+```json
+{
+  "training_session_id": "training-session-uuid",
+  "checkpoint_id": "checkpoint-uuid",
+  "model_name": "ppo-warehouse-policy",
+  "version": "v1.0.0",
+  "algorithm": "ppo",
+  "file_path": "s3://warehouse-ai/models/ppo-warehouse-policy/v1.0.0/model.pt",
+  "onnx_path": "s3://warehouse-ai/models/ppo-warehouse-policy/v1.0.0/model.onnx",
+  "reward_mean": 42.5,
+  "success_rate": 0.91,
+  "collision_rate": 0.03,
+  "is_active": true,
+  "metadata_json": {
+    "source": "api"
+  }
+}
+```
+
+The API enforces uniqueness for:
+
+```text
+model_name + version
+```
+
+If `is_active=true`, any existing active model with the same `model_name` is automatically deactivated.
+
+### List Model Versions
+
+```http
+GET /api/v1/models
+```
+
+Supported query parameters:
+
+- `page`
+- `page_size`
+- `training_session_id`
+- `checkpoint_id`
+- `model_name`
+- `version`
+- `is_active`
+- `sort_by`
+- `sort_order`
+
+### Get Model Version Detail
+
+```http
+GET /api/v1/models/{model_id}
+```
+
+### Active Models
+
+```http
+GET /api/v1/models/active
+```
+
+Optional query parameter:
+
+- `model_name`
+
+This endpoint returns a paginated list of active model versions.
+
+---
+
+## Error Behavior
+
+### Duplicate Checkpoint Step
+
+```json
+{
+  "error": {
+    "code": "checkpoint_step_exists",
+    "message": "Checkpoint already exists for this training session and step.",
+    "details": {},
+    "request_id": "request-id"
+  }
+}
+```
+
+### Duplicate Model Version
+
+```json
+{
+  "error": {
+    "code": "model_version_exists",
+    "message": "Model version already exists.",
+    "details": {},
+    "request_id": "request-id"
+  }
+}
+```
+
+### Invalid UUID
+
+Invalid UUID values return a **400 Bad Request** with the `invalid_uuid` error code.
+
+### Missing Resources
+
+Missing training sessions, checkpoints, or model versions return a **404 Not Found** with the `not_found` error code.
+
+### Relationship Mismatch
+
+Relationship validation failures return a **409 Conflict** response.

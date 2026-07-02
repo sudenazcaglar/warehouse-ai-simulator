@@ -334,3 +334,12 @@ api-verify-training:
 	$(DC_FULL) exec api python -m app.scripts.check_training_api_foundation
 	@echo "Training API verification successful."
 
+.PHONY: api-verify-checkpoints-models
+api-verify-checkpoints-models:
+	curl -fsS http://localhost:8000/health >/dev/null
+	curl -fsS http://localhost:8000/api/v1/checkpoints >/dev/null
+	curl -fsS http://localhost:8000/api/v1/models >/dev/null
+	curl -fsS http://localhost:8000/openapi.json >/dev/null
+	$(DC_FULL) exec api python -m app.scripts.check_checkpoints_models_api_foundation
+	@echo "Checkpoints and model registry API verification successful."
+
